@@ -1,0 +1,14 @@
+# Cache and model files
+.cache/
+chroma_store/
+__pycache__/
+*.pyc
+
+# Database
+trinity_rail.db
+
+# Environment
+.env
+
+# VS Code
+.vscode/
