@@ -10,12 +10,17 @@ else:
 
 client = chromadb.PersistentClient(path=CHROMA_PATH)
 
-# 2. Use Cloud Embedder (This is the 'Lightweight' secret)
-embedder = OpenAIEmbeddings(model="text-embedding-3-small")
+# 2. Use Cloud Embedder (This keeps the app tiny and fast)
+import chromadb.utils.embedding_functions as ef
+openai_ef = ef.OpenAIEmbeddingFunction(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model_name="text-embedding-3-small"
+)
 
-# 3. Create collection
+# 3. Create collection — Now it knows to use the cloud brain!
 collection = client.get_or_create_collection(
-    name="trinity_policies"
+    name="trinity_policies",
+    embedding_function=openai_ef
 )
 
 
