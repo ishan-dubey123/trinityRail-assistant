@@ -22,14 +22,20 @@ app = FastAPI(title="TrinityRail Assistant")
 
 # Run setup on startup
 
+#@app.on_event("startup")
+#def startup():
+    #print("🚀 Quick boot starting...")
+    
+    #create_tables() # Keep this as it is fast
+   # seed_data()   
+  #  load_documents()
+  #  print("✅ Fast boot ready.\n")
+
+
 @app.on_event("startup")
 def startup():
-    print("🚀 Quick boot starting...")
-    
-    create_tables() # Keep this as it is fast
-    seed_data()   
-    load_documents()
-    print("✅ Fast boot ready.\n")
+    print("🚀 App booted instantly!")
+
 
 
 
@@ -51,18 +57,21 @@ class ResumeRequest(BaseModel):
 
 @app.post("/ask")
 def ask(request: QuestionRequest):
-    """
-    Main endpoint — takes a question, runs the agent, returns answer.
-    """
-    # Generate a unique thread ID if not provided
-    # Thread ID keeps conversation memory separate per user
-    thread_id = request.thread_id or str(uuid.uuid4())
+    """ Main endpoint — handles setup and then answers. """
+    # Run these here so the 'Startup' doesn't timeout
+    create_tables()
+    seed_data()
+    
+    # We skip load_documents for the very first test to ensure speed
+    # load_documents() 
 
+    thread_id = request.thread_id or str(uuid.uuid4())
     result = ask_agent(
         question=request.question,
         thread_id=thread_id
     )
     return result
+
 
 @app.post("/resume")
 def resume(request: ResumeRequest):
