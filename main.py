@@ -55,22 +55,25 @@ class ResumeRequest(BaseModel):
 # API Endpoints
 # ─────────────────────────────────────────────
 
+
 @app.post("/ask")
 def ask(request: QuestionRequest):
-    """ Main endpoint — handles setup and then answers. """
-    # Run these here so the 'Startup' doesn't timeout
-    create_tables()
-    seed_data()
-    
-    # We skip load_documents for the very first test to ensure speed
-    # load_documents() 
+    try:
+        # Run setup
+        create_tables()
+        seed_data()
+        
+        # Start the agent
+        thread_id = request.thread_id or str(uuid.uuid4())
+        result = ask_agent(
+            question=request.question,
+            thread_id=thread_id
+        )
+        return result
+    except Exception as e:
+        # This sends the REAL error message to your chat box
+        return {"answer": f"❌ Developer Error: {str(e)}", "status": "error"}
 
-    thread_id = request.thread_id or str(uuid.uuid4())
-    result = ask_agent(
-        question=request.question,
-        thread_id=thread_id
-    )
-    return result
 
 
 @app.post("/resume")
