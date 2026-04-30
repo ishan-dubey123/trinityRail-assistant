@@ -5,6 +5,9 @@ from pydantic import BaseModel
 import uuid
 import os
 
+os.environ["DB_PATH"] = "/tmp/trinity_rail.db"
+os.environ["CHROMA_PATH"] = "/tmp/chroma_store"
+
 from database import create_tables, seed_data
 from rag import load_documents
 from graph import ask_agent, resume_agent
@@ -19,11 +22,10 @@ app = FastAPI(title="TrinityRail Assistant")
 @app.on_event("startup")
 def startup():
     print("🚀 Quick boot starting...")
-    os.environ["DB_PATH"] = "/tmp/trinity_rail.db"
-    os.environ["CHROMA_PATH"] = "/tmp/chroma_store"
+    
     create_tables() # Keep this as it is fast
-    # seed_data()   <-- Comment this out
-    # load_documents() <-- Comment this out
+    seed_data()   
+    load_documents()
     print("✅ Fast boot ready.\n")
 
 
