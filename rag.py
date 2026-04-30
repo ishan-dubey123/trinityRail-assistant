@@ -1,20 +1,14 @@
+import os
+
 def get_collection():
-    """This function runs without needing an OpenAI key."""
-    import os
+    """Ultra-light version for Vercel deployment."""
     import chromadb
-    # This is the 'No-Key' secret: a built-in, lightweight librarian
-    from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
+    # We tell ChromaDB to run 'in-memory' and 'pure-python'
+    # This prevents the libgomp.so.1 error
+    client = chromadb.Client()
     
-    CHROMA_PATH = "/tmp/chroma_store" if os.getenv("VERCEL") else "./chroma_store"
-    client = chromadb.PersistentClient(path=CHROMA_PATH)
-    
-    # We use the Default brain which is free and built-in
-    default_ef = DefaultEmbeddingFunction()
-    
-    return client.get_or_create_collection(
-        name="trinity_policies",
-        embedding_function=default_ef
-    )
+    return client.get_or_create_collection(name="trinity_policies")
+
 
 
 
