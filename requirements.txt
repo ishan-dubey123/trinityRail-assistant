@@ -1,10 +1,11 @@
 langgraph>=0.2.0
 langchain>=0.3.0
 langchain-groq
+langchain-openai
 langchain-core>=0.3.0
-chromadb>=0.5.0
+chromadb==0.5.3
 fastapi>=0.115.0
 uvicorn>=0.30.0
 pydantic>=2.0.0
 python-dotenv>=1.0.0
-langchain-openai
+openai
