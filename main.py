@@ -18,20 +18,14 @@ app = FastAPI(title="TrinityRail Assistant")
 
 @app.on_event("startup")
 def startup():
-    print("🚀 Starting TrinityRail Assistant...")
-    # Set paths first
+    print("🚀 Quick boot starting...")
     os.environ["DB_PATH"] = "/tmp/trinity_rail.db"
     os.environ["CHROMA_PATH"] = "/tmp/chroma_store"
-    
-    # 1. Create tables immediately (this is fast)
-    create_tables()
-    
-    # 2. SEED LATER: Comment these out for the first run to ensure the UI loads.
-    # You can move these to a special button or endpoint later.
-    # seed_data()
-    # load_documents()
-    
-    print("✅ System Ready (Seeding skipped for speed).\n")
+    create_tables() # Keep this as it is fast
+    # seed_data()   <-- Comment this out
+    # load_documents() <-- Comment this out
+    print("✅ Fast boot ready.\n")
+
 
 
 
