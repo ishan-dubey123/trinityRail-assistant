@@ -5,8 +5,12 @@ import os
 
 # DB_PATH = "trinity_rail.db"
 
-# This looks for the /tmp path we set in main.py
-DB_PATH = os.getenv("DB_PATH", "trinity_rail.db")
+# Force use /tmp on Vercel immediately
+if os.getenv("VERCEL"):
+    DB_PATH = "/tmp/trinity_rail.db"
+else:
+    DB_PATH = "trinity_rail.db"
+
 
 
 def get_connection():
