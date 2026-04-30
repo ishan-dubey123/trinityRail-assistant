@@ -14,8 +14,16 @@ import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 # 2. FIX DATABASE PATH: Use /tmp path for Vercel, or local path for your laptop
-CHROMA_PATH = os.getenv("CHROMA_PATH", "./chroma_store")
+# CHROMA_PATH = os.getenv("CHROMA_PATH", "./chroma_store")
+
+# Force use /tmp on Vercel immediately
+if os.getenv("VERCEL"):
+    CHROMA_PATH = "/tmp/chroma_store"
+else:
+    CHROMA_PATH = "./chroma_store"
+
 client = chromadb.PersistentClient(path=CHROMA_PATH)
+
 
 # Embedder
 embedder = SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
