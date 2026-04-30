@@ -31,7 +31,7 @@ class AgentState(TypedDict):
 # ─────────────────────────────────────────────
 # 2. THE LLM — using Grog + Llama 3.1
 # ─────────────────────────────────────────────
-llm = ChatGroq(model="llama-3.1-70b-versatile", temperature=0)
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 # temperature=0 means deterministic — same question always same answer
 # good for SQL generation where we want consistency
 
