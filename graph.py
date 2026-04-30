@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 from typing import TypedDict, Optional
 import json
@@ -29,9 +29,9 @@ class AgentState(TypedDict):
     follow_ups        : Optional[list]    # suggested follow-up questions
 
 # ─────────────────────────────────────────────
-# 2. THE LLM — using Ollama + Mistral locally
+# 2. THE LLM — using Grog + Llama 3.1
 # ─────────────────────────────────────────────
-llm = ChatOllama(model="mistral", temperature=0)
+llm = ChatGroq(model="llama-3.1-70b-versatile", temperature=0)
 # temperature=0 means deterministic — same question always same answer
 # good for SQL generation where we want consistency
 
