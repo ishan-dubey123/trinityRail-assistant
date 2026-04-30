@@ -5,12 +5,15 @@ from pydantic import BaseModel
 import uuid
 import os
 
+# 1. SET ENVIRONMENT FIRST
 os.environ["DB_PATH"] = "/tmp/trinity_rail.db"
 os.environ["CHROMA_PATH"] = "/tmp/chroma_store"
 
+# 2. THEN IMPORT THE AGENT FILES
 from database import create_tables, seed_data
 from rag import load_documents
 from graph import ask_agent, resume_agent
+
 
 # ─────────────────────────────────────────────
 # App Setup
