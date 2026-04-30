@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import uuid
+import os
 
 from database import create_tables, seed_data
 from rag import load_documents
@@ -14,13 +15,19 @@ from graph import ask_agent, resume_agent
 app = FastAPI(title="TrinityRail Assistant")
 
 # Run setup on startup
+
 @app.on_event("startup")
 def startup():
     print("🚀 Starting TrinityRail Assistant...")
+    # This tells the code to use the only folder Vercel lets us write to
+    os.environ["DB_PATH"] = "/tmp/railcar.db" 
+    os.environ["CHROMA_PATH"] = "/tmp/chroma_db"
+    
     create_tables()
     seed_data()
     load_documents()
     print("✅ All systems ready.\n")
+
 
 # ─────────────────────────────────────────────
 # Request/Response Models
