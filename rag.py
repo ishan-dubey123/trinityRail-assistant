@@ -1,21 +1,19 @@
-import os
-import chromadb
-
 def get_collection():
-    """This function only runs when we actually need to search or load."""
-    import chromadb.utils.embedding_functions as ef
+    """This function runs without needing an OpenAI key."""
+    import os
+    import chromadb
+    # This is the 'No-Key' secret: a built-in, lightweight librarian
+    from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
     
     CHROMA_PATH = "/tmp/chroma_store" if os.getenv("VERCEL") else "./chroma_store"
     client = chromadb.PersistentClient(path=CHROMA_PATH)
     
-    openai_ef = ef.OpenAIEmbeddingFunction(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model_name="text-embedding-3-small"
-    )
+    # We use the Default brain which is free and built-in
+    default_ef = DefaultEmbeddingFunction()
     
     return client.get_or_create_collection(
         name="trinity_policies",
-        embedding_function=openai_ef
+        embedding_function=default_ef
     )
 
 
