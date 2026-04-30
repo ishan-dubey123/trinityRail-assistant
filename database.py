@@ -1,8 +1,13 @@
 import sqlite3
 from datetime import datetime, timedelta
 import random
+import os
 
-DB_PATH = "trinity_rail.db"
+# DB_PATH = "trinity_rail.db"
+
+# This looks for the /tmp path we set in main.py
+DB_PATH = os.getenv("DB_PATH", "trinity_rail.db")
+
 
 def get_connection():
     """Returns a connection to the SQLite database."""
