@@ -19,14 +19,20 @@ app = FastAPI(title="TrinityRail Assistant")
 @app.on_event("startup")
 def startup():
     print("🚀 Starting TrinityRail Assistant...")
-    # This tells the code to use the only folder Vercel lets us write to
-    os.environ["DB_PATH"] = "/tmp/railcar.db" 
-    os.environ["CHROMA_PATH"] = "/tmp/chroma_db"
+    # Set paths first
+    os.environ["DB_PATH"] = "/tmp/trinity_rail.db"
+    os.environ["CHROMA_PATH"] = "/tmp/chroma_store"
     
+    # 1. Create tables immediately (this is fast)
     create_tables()
-    seed_data()
-    load_documents()
-    print("✅ All systems ready.\n")
+    
+    # 2. SEED LATER: Comment these out for the first run to ensure the UI loads.
+    # You can move these to a special button or endpoint later.
+    # seed_data()
+    # load_documents()
+    
+    print("✅ System Ready (Seeding skipped for speed).\n")
+
 
 
 # ─────────────────────────────────────────────
