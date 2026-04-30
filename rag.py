@@ -1,13 +1,21 @@
 import os
-os.environ["HF_HOME"] = r"D:\Fleet_Asset_Intelligence_Agent_Railcars_Trinity_Industries\.cache"
-os.environ["TRANSFORMERS_CACHE"] = r"D:\Fleet_Asset_Intelligence_Agent_Railcars_Trinity_Industries\.cache"
+
+# 1. FIX CACHE PATHS: Use /tmp for Vercel, or your local path for home
+if os.getenv("VERCEL"):
+    os.environ["HF_HOME"] = "/tmp/.cache"
+    os.environ["TRANSFORMERS_CACHE"] = "/tmp/.cache"
+else:
+    # This keeps it working on your laptop
+    os.environ["HF_HOME"] = r"D:\Fleet_Asset_Intelligence_Agent_Railcars_Trinity_Industries\.cache"
+
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
-# ChromaDB client
-client = chromadb.PersistentClient(path="./chroma_store")
+# 2. FIX DATABASE PATH: Use /tmp path for Vercel, or local path for your laptop
+CHROMA_PATH = os.getenv("CHROMA_PATH", "./chroma_store")
+client = chromadb.PersistentClient(path=CHROMA_PATH)
 
 # Embedder
 embedder = SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
@@ -17,6 +25,7 @@ collection = client.get_or_create_collection(
     name="trinity_policies",
     embedding_function=embedder
 )
+
 
 # --- Trinity Policy Documents ---
 # These are realistic policy statements a railcar company would have
