@@ -1,27 +1,22 @@
 import os
 import chromadb
-from langchain_openai import OpenAIEmbeddings
 
-# 1. Use /tmp for Vercel, or local for your laptop
-if os.getenv("VERCEL"):
-    CHROMA_PATH = "/tmp/chroma_store"
-else:
-    CHROMA_PATH = "./chroma_store"
-
-client = chromadb.PersistentClient(path=CHROMA_PATH)
-
-# 2. Use Cloud Embedder (This keeps the app tiny and fast)
-import chromadb.utils.embedding_functions as ef
-openai_ef = ef.OpenAIEmbeddingFunction(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model_name="text-embedding-3-small"
-)
-
-# 3. Create collection — Now it knows to use the cloud brain!
-collection = client.get_or_create_collection(
-    name="trinity_policies",
-    embedding_function=openai_ef
-)
+def get_collection():
+    """This function only runs when we actually need to search or load."""
+    import chromadb.utils.embedding_functions as ef
+    
+    CHROMA_PATH = "/tmp/chroma_store" if os.getenv("VERCEL") else "./chroma_store"
+    client = chromadb.PersistentClient(path=CHROMA_PATH)
+    
+    openai_ef = ef.OpenAIEmbeddingFunction(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        model_name="text-embedding-3-small"
+    )
+    
+    return client.get_or_create_collection(
+        name="trinity_policies",
+        embedding_function=openai_ef
+    )
 
 
 
@@ -66,7 +61,9 @@ def load_documents():
     Loads policy documents into ChromaDB.
     Only loads if collection is empty — avoids duplicates.
     """
+    collection = get_collection() 
     existing = collection.count()
+
     if existing > 0:
         print(f"✅ ChromaDB already has {existing} documents loaded.")
         return
@@ -81,22 +78,13 @@ def load_documents():
 def search_documents(question: str, top_k: int = 3, threshold: float = 0.7):
     """
     Searches ChromaDB for documents relevant to the question.
-
-    How it works:
-    1. Converts the question to a vector (embedding)
-    2. Finds the top_k most similar documents
-    3. Filters out anything below the threshold score
-
-    Args:
-        question  : the user's question
-        top_k     : how many results to return max
-        threshold : minimum similarity score (0.0 to 1.0)
-
-    Returns a dict with matched documents and their scores.
+    ...
     """
+    collection = get_collection()
     results = collection.query(
         query_texts=[question],
         n_results=top_k
+
     )
 
     # ChromaDB returns distances (lower = more similar)
