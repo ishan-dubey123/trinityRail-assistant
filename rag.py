@@ -1,13 +1,19 @@
 import os
+from pinecone import Pinecone
+from langchain_pinecone import PineconeVectorStore
+from langchain_community.embeddings import DeterministicFakeEmbedding
 
-def get_collection():
-    """Ultra-light version for Vercel deployment."""
-    import chromadb
-    # We tell ChromaDB to run 'in-memory' and 'pure-python'
-    # This prevents the libgomp.so.1 error
-    client = chromadb.Client()
+
+def get_vectorstore():
+    # Use the same 'Fake' brain we used on your laptop script
+    embeddings = DeterministicFakeEmbedding(size=1536)
     
-    return client.get_or_create_collection(name="trinity_policies")
+    # These grab the keys you saved in Vercel settings
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    index_name = os.getenv("PINECONE_INDEX_NAME")
+    
+    return PineconeVectorStore(index_name=index_name, embedding=embeddings)
+
 
 
 
@@ -67,17 +73,25 @@ def load_documents():
     )
     print(f"✅ Loaded {len(POLICY_DOCUMENTS)} policy documents into ChromaDB.")
 
-def search_documents(question: str, top_k: int = 3, threshold: float = 0.7):
-    """
-    Searches ChromaDB for documents relevant to the question.
-    ...
-    """
-    collection = get_collection()
-    results = collection.query(
-        query_texts=[question],
-        n_results=top_k
+def search_documents(question: str, top_k: int = 3):
+    """Searches the cloud-hosted Pinecone index."""
+    # 1. Connect to the cloud vault
+    vectorstore = get_vectorstore()
+    
+    # 2. Search the cloud index for the best match
+    results = vectorstore.similarity_search_with_score(question, k=top_k)
+    
+    # 3. Format the results so the agent can read them
+    matched = []
+    for doc, score in results:
+        matched.append({
+            "document": doc.page_content, 
+            "similarity": round(score, 3)
+        })
+        
+    return {"matched": matched, "count": len(matched)}
 
-    )
+
 
     # ChromaDB returns distances (lower = more similar)
     # We convert distance to similarity: similarity = 1 - distance
