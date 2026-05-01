@@ -5,15 +5,16 @@ from langchain_community.embeddings import DeterministicFakeEmbedding
 
 
 def get_vectorstore():
-    # Use the same 'Fake' brain we used on your laptop script
+    # 1. Use the same 'Fake' brain we used on your laptop
+    from langchain_community.embeddings import DeterministicFakeEmbedding
     embeddings = DeterministicFakeEmbedding(size=1536)
     
-    # These grab the keys you saved in Vercel settings
+    # 2. Setup Pinecone
+    # We use your Vercel key, but we HARD-CODE the index name so it can't be missed
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-    index_name = os.getenv("PINECONE_INDEX_NAME")
+    index_name = "trinity-rail-index" # <--- This is the hard-coded fix
     
     return PineconeVectorStore(index_name=index_name, embedding=embeddings)
-
 
 
 
