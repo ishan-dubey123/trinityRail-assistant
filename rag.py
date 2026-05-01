@@ -73,7 +73,7 @@ def load_documents():
     )
     print(f"✅ Loaded {len(POLICY_DOCUMENTS)} policy documents into ChromaDB.")
 
-def search_documents(question: str, top_k: int = 3):
+def search_documents(question: str, top_k: int = 3, **kwargs):
     """Searches the cloud-hosted Pinecone index."""
     # 1. Connect to the cloud vault
     vectorstore = get_vectorstore()
