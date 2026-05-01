@@ -90,7 +90,12 @@ def search_documents(question: str, top_k: int = 3, **kwargs):
             "similarity": round(score, 3)
         })
         
-    return {"matched": matched, "count": len(matched)}
+        return {
+        "matched": matched, 
+        "count": len(matched), 
+        "best_score": matched[0]["similarity"] if matched else 0.0
+    }
+
 
 
 
