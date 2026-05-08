@@ -1,16 +1,15 @@
 {
-  "builds": [
-    {
-      "src": "main.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "excludeFiles": [
-    ".venv/**",
-    "__pycache__/**",
-    "*.db",
-    "upload_*.py",
-    "*.md",
-    ".gitignore"
-  ]
+    "builds": [
+        {
+            "src": "main.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "excludeFiles": [
+        ".venv/**",
+        "node_modules/**",
+        "upload_mistral.py",
+        "*.db",
+        "__pycache__/**"
+    ]
 }
