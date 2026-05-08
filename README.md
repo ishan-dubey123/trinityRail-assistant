@@ -1,6 +1,6 @@
 # 🚂 TrinityRail Assistant — Multi-Agent AI System
 
-A multi-agent AI system built with LangGraph, ChromaDB, and FastAPI
+A multi-agent AI system built with LangGraph, Pinecone, and FastAPI
 that answers natural language questions about railcar fleet data,
 maintenance policies, and lease information.
 
@@ -8,33 +8,23 @@ maintenance policies, and lease information.
 
 - **Router Node** — classifies question as SQL, RAG, or both
 - **SQL Agent** — generates and runs SQLite queries using LLM
-- **RAG Agent** — searches policy documents using ChromaDB embeddings
+- **RAG Agent** — searches policy documents using Mistral AI embeddings + Pinecone vector DB
 - **Confidence Scorer** — scores result quality (High/Medium/Low)
-- **Human-in-the-Loop** — pauses for confirmation on sensitive queries
+- **Human-in-the-Loop** — pauses for confirmation on sensitive queries or Low confidence
 - **Synthesizer** — combines results into a clean natural language answer
-
+  
 ## Tech Stack
 
 - LangGraph (multi-agent orchestration)
-- ChromaDB (vector store for RAG)
-- Ollama + Mistral (local LLM, no API key needed)
+- Pinecone (Cloud vector store for RAG)
+- Mistral AI (embedding API)
+- Grog (LLM for SQL & reasoning)
 - FastAPI (REST API + chat UI)
 - SQLite (mock railcar database)
+- Vercel (Serverless Deployment)
 
-## Setup
-
-### 1. Install dependencies
-pip install -r requirements.txt
-
-### 2. Start Ollama with Mistral
-ollama pull mistral
-ollama serve
-
-### 3. Run the server
-python main.py
-
-### 4. Open browser
-http://localhost:8000
+## Live Demo
+https://trinity-rail-assistant.vercel.app/
 
 ## Sample Questions
 
