@@ -27,24 +27,35 @@ class AgentState(TypedDict):
 # ========== 2. LLM (Groq, free) ==========
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 
-# ========== 3. ROUTER ==========
+# ========== 3. ROUTER (STRONG BIAS FOR RAG ON POLICY WORDS) ==========
 def router_node(state: AgentState) -> AgentState:
     print(f"\n🔀 ROUTER: {state['question']}")
+    question_lower = state["question"].lower()
+    
+    # Force RAG if question contains policy-related keywords
+    policy_keywords = ["policy", "policies", "document", "rule", "guideline", "regulation", "inspection rule", "maintenance policy"]
+    if any(kw in question_lower for kw in policy_keywords):
+        print("   → Force route: rag (policy keywords detected)")
+        return {**state, "route": "rag"}
+
     prompt = f"""
-Classify question into "sql", "rag", or "both":
-- sql: needs database data (counts, lists)
-- rag: needs policy documents
-- both: needs both
+You are a router for a railcar assistant. Decide if the user's question needs:
+- "sql" → ONLY for database data: counts, lists of cars, lease info, specific car attributes.
+- "rag" → ONLY for policies, rules, documents, guidelines, or any question that asks "what is the rule/policy for...".
+- "both" → only if they need both data and policy (e.g., "show idle tank cars and their inspection rule").
+
+IMPORTANT: If the question contains words like "policy", "rule", "document", "guideline", "regulation", answer "rag".
+
 Question: {state['question']}
-Reply with only one word.
+Reply with exactly one word: sql, rag, or both.
 """
     route = llm.invoke([HumanMessage(content=prompt)]).content.strip().lower()
     if route not in ["sql", "rag", "both"]:
         route = "both"
-    print(f"   → {route}")
+    print(f"   → Route: {route}")
     return {**state, "route": route}
 
-# ========== 4. SQL AGENT (with post‑generation validation) ==========
+# ========== 4. SQL AGENT (with validation to remove extra car_type filters) ==========
 def sql_agent_node(state: AgentState) -> AgentState:
     print(f"\n📊 SQL AGENT")
     question = state["question"]
@@ -75,9 +86,9 @@ SQL query:
 
     # ----- Validation: remove car_type filter if user didn't mention a car type -----
     car_type_keywords = ['tank', 'boxcar', 'flatcar']
-    user_mentioned = any(word in question_lower for word in car_type_keywords)
+    user_mentioned_car_type = any(word in question_lower for word in car_type_keywords)
 
-    if not user_mentioned:
+    if not user_mentioned_car_type:
         # Remove patterns like `car_type='tank'` or `car_type = 'boxcar'` from WHERE clause
         pattern = r"(?:\bAND\s+)?car_type\s*=\s*'[^']+'(?:\s+AND\s+|\s*$)"
         sql_query = re.sub(pattern, '', sql_query, flags=re.IGNORECASE)
