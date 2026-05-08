@@ -12,3 +12,4 @@ python-dotenv>=1.0.0
 langchain-huggingface   
 sentence-transformers   
 pinecone-text>=0.7.0
+langchain-mistralai
