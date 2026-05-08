@@ -5,64 +5,49 @@ from pydantic import BaseModel
 import uuid
 import os
 
-# 1. SET ENVIRONMENT FIRST
+# ============================================================
+# 1. ENVIRONMENT VARIABLES (for serverless compatibility)
+# ============================================================
 os.environ["DB_PATH"] = "/tmp/trinity_rail.db"
-os.environ["CHROMA_PATH"] = "/tmp/chroma_store"
+# ChromaDB is no longer used; keeping this line does nothing (safe to remove later)
 
-# 2. THEN IMPORT THE AGENT FILES
+# ============================================================
+# 2. IMPORTS (only what is needed)
+# ============================================================
 from database import create_tables, seed_data
 from graph import ask_agent, resume_agent
 
-
-# ─────────────────────────────────────────────
-# App Setup
-# ─────────────────────────────────────────────
+# ============================================================
+# 3. FASTAPI APP SETUP
+# ============================================================
 app = FastAPI(title="TrinityRail Assistant")
 
-# Run setup on startup
-
-#@app.on_event("startup")
-#def startup():
-    #print("🚀 Quick boot starting...")
-    
-    #create_tables() # Keep this as it is fast
-   # seed_data()   
-  #  load_documents()
-  #  print("✅ Fast boot ready.\n")
-
-
+# Startup event (no heavy loading, just a print)
 @app.on_event("startup")
 def startup():
-    print("🚀 App booted instantly!")
+    print("🚀 TrinityRail Assistant booted instantly!")
 
-
-
-
-
-# ─────────────────────────────────────────────
-# Request/Response Models
-# ─────────────────────────────────────────────
+# ============================================================
+# 4. REQUEST/RESPONSE MODELS
+# ============================================================
 class QuestionRequest(BaseModel):
-    question : str
+    question: str
     thread_id: Optional[str] = None
 
 class ResumeRequest(BaseModel):
     thread_id: str
-    decision : str         # "proceed" or "refine"
+    decision: str          # "proceed" or "refine"
 
-# ─────────────────────────────────────────────
-# API Endpoints
-# ─────────────────────────────────────────────
-
-
+# ============================================================
+# 5. API ENDPOINTS
+# ============================================================
 @app.post("/ask")
 def ask(request: QuestionRequest):
     try:
-        # Run setup
+        # Ensure database exists (creates tables & seeds if needed)
         create_tables()
         seed_data()
-        
-        # Start the agent
+
         thread_id = request.thread_id or str(uuid.uuid4())
         result = ask_agent(
             question=request.question,
@@ -70,17 +55,10 @@ def ask(request: QuestionRequest):
         )
         return result
     except Exception as e:
-        # This sends the REAL error message to your chat box
         return {"answer": f"❌ Developer Error: {str(e)}", "status": "error"}
-
-
 
 @app.post("/resume")
 def resume(request: ResumeRequest):
-    """
-    Resume endpoint — called after human checkpoint.
-    User sends "proceed" or "refine".
-    """
     result = resume_agent(
         thread_id=request.thread_id,
         decision=request.decision
@@ -91,9 +69,9 @@ def resume(request: ResumeRequest):
 def health():
     return {"status": "running", "agent": "TrinityRail Assistant"}
 
-# ─────────────────────────────────────────────
-# Simple Chat UI — served at localhost:8000
-# ─────────────────────────────────────────────
+# ============================================================
+# 6. SIMPLE CHAT UI (embedded HTML)
+# ============================================================
 @app.get("/", response_class=HTMLResponse)
 def chat_ui():
     return """
@@ -260,7 +238,6 @@ def chat_ui():
 <script>
     let currentThreadId = null;
 
-    // Allow Enter key to send
     document.getElementById('question-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendQuestion();
     });
@@ -280,7 +257,6 @@ def chat_ui():
         const question = input.value.trim();
         if (!question) return;
 
-        // Show user message
         addMessage(question, true);
         input.value = '';
         btn.disabled = true;
@@ -373,9 +349,9 @@ def chat_ui():
 </html>
 """
 
-# ─────────────────────────────────────────────
-# Run the server
-# ─────────────────────────────────────────────
+# ============================================================
+# 7. RUN SERVER (local development only)
+# ============================================================
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
